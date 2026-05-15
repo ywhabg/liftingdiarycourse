@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { and, eq, gte, lt } from 'drizzle-orm'
+import { format, parseISO } from 'date-fns'
 import { db } from '@/src/db'
 import { workoutsTable } from '@/src/db/schema'
 import DatePicker from './DatePicker'
@@ -12,7 +13,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   if (!userId) redirect('/')
 
   const { date } = await searchParams
-  const selectedDate = date ?? new Date().toISOString().split('T')[0]
+  const selectedDate = date ?? format(new Date(), 'yyyy-MM-dd')
 
   const start = new Date(`${selectedDate}T00:00:00.000Z`)
   const end = new Date(`${selectedDate}T24:00:00.000Z`)
@@ -53,14 +54,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
                 LIFT<span className="text-orange-500">LOG</span>
               </h1>
               <p className="mt-0.5 text-xs font-semibold uppercase tracking-widest text-zinc-500">
-                {new Date(selectedDate).toLocaleDateString([], {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                })}
+                {format(parseISO(selectedDate), 'EEEE — do MMM yyyy')}
               </p>
             </div>
-            <DatePicker key={selectedDate} date={selectedDate} />
+            <DatePicker date={selectedDate} />
           </div>
 
           {/* Stats strip */}
@@ -141,7 +138,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
                                 <span className="ml-0.5 text-[10px] font-normal text-zinc-400">reps</span>
                               </p>
                               <p className="mt-0.5 text-xs font-bold text-orange-400 leading-none">
-                                {set.weight}
+                                {parseFloat(set.weight)}
                                 <span className="ml-0.5 text-[10px] font-normal text-zinc-500">{set.unit}</span>
                               </p>
                             </div>
